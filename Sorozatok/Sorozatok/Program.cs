@@ -10,7 +10,7 @@ namespace Sorozatok
     class C {
         public string cim, resz,date2;
         public DateTime date;
-        public int hossz;
+        public int hossz,ev,honap,nap;
         public bool latta;
        
         public C(string[] sorok)
@@ -21,10 +21,23 @@ namespace Sorozatok
            resz = sorok[2];
             hossz = int.Parse(sorok[3]);
             latta = sorok[4] == "1" ? true : false;
+            
         }
     }
     class Program
     {
+        static string hetnapja(int ev, int ho, int nap)
+        {
+            var napok = new string[] { "v","h","k","sze","cs","p","szo"};
+            var honapok = new int[] { 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 };
+            if (ho<3)
+            {
+                ev -= 1;
+                
+            }
+            int index = (ev + ev / 4 - ev / 100 + ev / 400 + honapok[ho - 1] + nap) % 7;
+            return napok[index];
+        }
         static void Main(string[] args)
         {
             var lista = new List<C>();
@@ -50,19 +63,28 @@ namespace Sorozatok
             var idoh = (ido / 60) % 24;
             var idop = ido%60;
             Console.WriteLine($"{idon} {idoh} {idop} {ido}");
-            Console.WriteLine("dátum be");
+            Console.Write("dátum be");
             var datum =DateTime.Parse( Console.ReadLine());
             var newlist = new List<C>();
-            int lep = 0;
-            do
+            
+            foreach (var item in lista)
             {
-                if (lista[lep].latta == false)
+                if (item.date<=datum)
                 {
-                    Console.WriteLine($" {lista[lep].date} {lista[lep].resz} {lista[lep].cim}   {lista[lep].latta}");
+                    if (item.latta == false && item.date2!="NI")
+                    {
+                        Console.WriteLine($"{item.resz}\t{item.cim}");
+                    }
                 }
-                lep++;
-            } while (lista[lep].date <= datum);
-
+                
+            }
+            Console.Write("Adja meg a hét egy napját (például cs)! Nap= ");
+            string napocska= Console.ReadLine();
+            var last = (from sor in lista where  hetnapja(sor.date.Year,sor.date.Month,sor.date.Day)==napocska group sor by sor.cim);
+            foreach (var item in last)
+            {
+                Console.WriteLine(item.Key);
+            }
 
             Console.ReadKey(); 
         }
